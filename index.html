@@ -1,0 +1,2992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Projeto de Piscina Térmica Automatizada do Colégio Estadual do Paraná - Tecnociência, Robótica e Acessibilidade." />
+<meta name="theme-color" content="#005C53" />
+<title>Piscina Térmica & Tecnociência — CEP</title>
+
+<!-- Fonte OpenDyslexic -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=OpenDyslexic&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<!-- VLibras -->
+<div vw class="enabled">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>
+  new window.VLibras.Widget('https://vlibras.gov.br/app');
+</script>
+
+<style>
+/* ============================================================
+   RESET & VARIÁVEIS GLOBAIS
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Paleta oficial */
+  --azul-oceano: #005C53;
+  --azul-oceano-escuro: #003F38;
+  --azul-oceano-claro: #007A6E;
+  --amarelo-solar: #F4A261;
+  --amarelo-solar-escuro: #E08A43;
+  --branco: #FFFFFF;
+  --cinza-escuro: #222222;
+  --cinza-medio: #555555;
+  --cinza-claro: #F3F4F6;
+  --vermelho-alerta: #D62828;
+  --verde-ok: #2A9D8F;
+
+  /* Tipografia */
+  --font-base: 'Poppins', 'Atkinson Hyperlegible', Arial, sans-serif;
+  --font-dyslexic: 'OpenDyslexic', 'Atkinson Hyperlegible', sans-serif;
+
+  /* Tamanhos base */
+  --font-size-base: 16px;
+  --font-scale: 1;
+
+  /* Espaçamentos */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.18);
+
+  /* Bordas */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+
+  /* Transições */
+  --transition-fast: 150ms ease;
+  --transition-base: 280ms ease;
+}
+
+html {
+  font-size: calc(var(--font-size-base) * var(--font-scale));
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--branco);
+  color: var(--cinza-escuro);
+  line-height: 1.65;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body.high-contrast {
+  --azul-oceano: #000000;
+  --azul-oceano-escuro: #000000;
+  --azul-oceano-claro: #000000;
+  --amarelo-solar: #FFFF00;
+  --amarelo-solar-escuro: #FFFF00;
+  --branco: #000000;
+  --cinza-escuro: #FFFFFF;
+  --cinza-medio: #FFFFFF;
+  --cinza-claro: #000000;
+  --verde-ok: #00FF00;
+  --vermelho-alerta: #FF0000;
+}
+
+body.high-contrast {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+body.dyslexic-font {
+  font-family: var(--font-dyslexic) !important;
+}
+
+body.dyslexic-font * {
+  font-family: inherit !important;
+  letter-spacing: 0.03em;
+  word-spacing: 0.08em;
+}
+
+img, svg, canvas {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--azul-oceano);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition-fast);
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--amarelo-solar-escuro);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Foco visível para navegação por teclado */
+:focus-visible {
+  outline: 3px solid var(--amarelo-solar);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  z-index: 10000;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================================
+   BARRA GLOBAL DE ACESSIBILIDADE
+   ============================================================ */
+.a11y-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--cinza-escuro);
+  color: var(--branco);
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  box-shadow: var(--shadow-md);
+  font-size: 0.85rem;
+}
+
+.a11y-bar button,
+.a11y-bar a {
+  background: transparent;
+  color: var(--branco);
+  border: 2px solid transparent;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.a11y-bar button:hover,
+.a11y-bar button:focus-visible,
+.a11y-bar a:hover,
+.a11y-bar a:focus-visible {
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  border-color: var(--amarelo-solar);
+}
+
+.a11y-bar .divider {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   HEADER / NAVEGAÇÃO PRINCIPAL
+   ============================================================ */
+.main-header {
+  margin-top: 54px;
+  background: linear-gradient(135deg, var(--azul-oceano) 0%, var(--azul-oceano-escuro) 100%);
+  color: var(--branco);
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 54px;
+  z-index: 998;
+  box-shadow: var(--shadow-md);
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--branco);
+  text-decoration: none;
+}
+
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  background: var(--amarelo-solar);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 4px rgba(244, 162, 97, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-logo::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: -2px;
+  right: -2px;
+  height: 40%;
+  background: linear-gradient(180deg, transparent, rgba(0, 92, 83, 0.6));
+  border-radius: 50%;
+}
+
+.brand-logo svg {
+  width: 28px;
+  height: 28px;
+  z-index: 1;
+}
+
+.brand-text small {
+  display: block;
+  font-weight: 400;
+  font-size: 0.75rem;
+  opacity: 0.85;
+  letter-spacing: 0.5px;
+}
+
+.main-nav ul {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.main-nav a {
+  color: var(--branco);
+  text-decoration: none;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.92rem;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 2px solid transparent;
+}
+
+.main-nav a:hover,
+.main-nav a:focus-visible {
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  transform: translateY(-2px);
+}
+
+.main-nav .num {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.menu-toggle {
+  display: none;
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+
+/* ============================================================
+   HERO / SEÇÃO DE ABERTURA
+   ============================================================ */
+.hero {
+  position: relative;
+  min-height: 78vh;
+  background:
+    radial-gradient(ellipse at top right, rgba(244, 162, 97, 0.25), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(0, 92, 83, 0.35), transparent 55%),
+    linear-gradient(160deg, var(--azul-oceano) 0%, var(--azul-oceano-escuro) 100%);
+  color: var(--branco);
+  padding: var(--space-xl) 2rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08) 0, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(244, 162, 97, 0.12) 0, transparent 40%);
+  pointer-events: none;
+}
+
+.hero-inner {
+  max-width: 1300px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-content h1 {
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+}
+
+.hero-content h1 .highlight {
+  color: var(--amarelo-solar);
+  display: inline-block;
+  position: relative;
+}
+
+.hero-content h1 .highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 4px;
+  background: var(--amarelo-solar);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.hero-content .subtitle {
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  margin-bottom: 1.5rem;
+  opacity: 0.95;
+  max-width: 600px;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(6px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.btn {
+  padding: 0.9rem 1.6rem;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-base);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--amarelo-solar-escuro);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(244, 162, 97, 0.4);
+  color: var(--cinza-escuro);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--branco);
+  border-color: var(--branco);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  background: var(--branco);
+  color: var(--azul-oceano);
+  transform: translateY(-3px);
+}
+
+/* Protótipo visual */
+.prototype-visual {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.pool-scene {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #87CEEB 0%, #4A90B8 45%, #005C53 45%, #003F38 100%);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 4px solid var(--branco);
+}
+
+.sun {
+  position: absolute;
+  top: 12%;
+  right: 15%;
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, var(--amarelo-solar) 0%, #FFD166 60%, transparent 75%);
+  border-radius: 50%;
+  animation: sunPulse 4s ease-in-out infinite;
+  box-shadow: 0 0 40px rgba(244, 162, 97, 0.6);
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.9; }
+}
+
+.solar-panel {
+  position: absolute;
+  top: 28%;
+  left: 10%;
+  width: 90px;
+  height: 50px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 2px solid #444;
+  border-radius: 4px;
+  transform: perspective(300px) rotateX(20deg);
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 15px 15px;
+}
+
+.water-surface {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(180deg, rgba(0, 122, 110, 0.7), rgba(0, 63, 56, 0.95));
+  overflow: hidden;
+}
+
+.wave {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: waveMove 6s linear infinite;
+}
+
+.wave:nth-child(1) { top: 0; animation-duration: 6s; }
+.wave:nth-child(2) { top: 15px; animation-duration: 8s; animation-delay: -2s; opacity: 0.7; }
+.wave:nth-child(3) { top: 30px; animation-duration: 10s; animation-delay: -4s; opacity: 0.5; }
+
+@keyframes waveMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50%); }
+}
+
+.sensor-probe {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 60px;
+  background: linear-gradient(180deg, #ccc 0%, #888 100%);
+  border-radius: 4px 4px 8px 8px;
+  border: 2px solid #333;
+  z-index: 2;
+}
+
+.sensor-probe::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 15px;
+  background: #333;
+}
+
+.temp-display {
+  position: absolute;
+  top: 55%;
+  right: 8%;
+  background: #000;
+  color: var(--amarelo-solar);
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  padding: 0.5rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 2px solid #444;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-md);
+  z-index: 3;
+}
+
+.temp-display::before {
+  content: "●";
+  color: var(--verde-ok);
+  margin-right: 0.3rem;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.bubbles {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  animation: bubbleRise 5s linear infinite;
+}
+
+@keyframes bubbleRise {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { opacity: 0.8; }
+  100% { transform: translateY(-250px) scale(1.2); opacity: 0; }
+}
+
+.prototype-caption {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* ============================================================
+   SEÇÕES GERAIS
+   ============================================================ */
+.section {
+  padding: var(--space-xl) 2rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.section-alt {
+  background: var(--cinza-claro);
+}
+
+.section-dark {
+  background: var(--cinza-escuro);
+  color: var(--branco);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.section-tag {
+  display: inline-block;
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 0.8rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 800;
+  color: var(--azul-oceano);
+  margin-bottom: 0.8rem;
+  line-height: 1.2;
+}
+
+.section-dark .section-title {
+  color: var(--amarelo-solar);
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--cinza-medio);
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.section-dark .section-subtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ============================================================
+   CARDS / DESAFIO / SOLUÇÃO
+   ============================================================ */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.8rem;
+  margin-top: 2rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.8rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: var(--branco);
+  padding: 2rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--azul-oceano), var(--amarelo-solar));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-base);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--azul-oceano), var(--azul-oceano-claro));
+  color: var(--branco);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.card h3 {
+  color: var(--azul-oceano);
+  font-size: 1.3rem;
+  margin-bottom: 0.6rem;
+  font-weight: 700;
+}
+
+.card p {
+  color: var(--cinza-medio);
+  line-height: 1.7;
+}
+
+/* Bloco de destaque */
+.highlight-block {
+  background: linear-gradient(135deg, var(--azul-oceano) 0%, var(--azul-oceano-escuro) 100%);
+  color: var(--branco);
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  margin: 2.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.highlight-block::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(244, 162, 97, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.highlight-block h3 {
+  color: var(--amarelo-solar);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.highlight-block p,
+.highlight-block li {
+  position: relative;
+  z-index: 1;
+  line-height: 1.8;
+}
+
+.highlight-block ul {
+  list-style: none;
+  margin-top: 1rem;
+}
+
+.highlight-block li {
+  padding: 0.6rem 0 0.6rem 2rem;
+  position: relative;
+}
+
+.highlight-block li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0.6rem;
+  width: 24px;
+  height: 24px;
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   PÁGINA 2 - FÍSICA APLICADA
+   ============================================================ */
+.physics-topic {
+  background: var(--branco);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 6px solid var(--amarelo-solar);
+  transition: all var(--transition-base);
+}
+
+.physics-topic:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.physics-topic h3 {
+  color: var(--azul-oceano);
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.physics-topic .topic-number {
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.physics-topic .concept,
+.physics-topic .application {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius-sm);
+  line-height: 1.7;
+}
+
+.physics-topic .concept {
+  background: rgba(0, 92, 83, 0.06);
+  border-left: 3px solid var(--azul-oceano);
+}
+
+.physics-topic .application {
+  background: rgba(244, 162, 97, 0.1);
+  border-left: 3px solid var(--amarelo-solar);
+}
+
+.physics-topic .label {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--azul-oceano);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   PÁGINA 3 - ROBÓTICA
+   ============================================================ */
+.component-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.component {
+  background: var(--branco);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  border-top: 4px solid var(--azul-oceano);
+}
+
+.component:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg);
+  border-top-color: var(--amarelo-solar);
+}
+
+.component-visual {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, var(--cinza-claro), var(--branco));
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: 2.5rem;
+  border: 2px solid var(--cinza-claro);
+}
+
+.component h4 {
+  color: var(--azul-oceano);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.component p {
+  font-size: 0.9rem;
+  color: var(--cinza-medio);
+}
+
+/* Fluxograma */
+.flowchart {
+  background: var(--branco);
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 2rem 0;
+  overflow-x: auto;
+}
+
+.flowchart-title {
+  text-align: center;
+  color: var(--azul-oceano);
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 500px;
+  margin: 0 auto;
+}
+
+.flow-node {
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-align: center;
+  min-width: 280px;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.flow-start {
+  background: linear-gradient(135deg, var(--azul-oceano), var(--azul-oceano-claro));
+  color: var(--branco);
+  border-radius: 999px;
+}
+
+.flow-process {
+  background: var(--cinza-claro);
+  color: var(--cinza-escuro);
+  border: 2px solid var(--azul-oceano);
+}
+
+.flow-decision {
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  transform: rotate(0deg);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  padding: 2rem 3rem;
+  min-width: 320px;
+}
+
+.flow-decision-text {
+  transform: rotate(0deg);
+  font-size: 0.95rem;
+}
+
+.flow-action-yes {
+  background: var(--vermelho-alerta);
+  color: var(--branco);
+}
+
+.flow-action-no {
+  background: var(--verde-ok);
+  color: var(--branco);
+}
+
+.flow-arrow {
+  font-size: 1.5rem;
+  color: var(--azul-oceano);
+  font-weight: 800;
+}
+
+.flow-branch {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+  align-items: flex-start;
+}
+
+.flow-branch-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flow-branch-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--cinza-escuro);
+  color: var(--branco);
+}
+
+/* ============================================================
+   PÁGINA 4 - SIMULADORES
+   ============================================================ */
+.simulator-container {
+  background: var(--branco);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2.5rem;
+}
+
+.simulator-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--cinza-claro);
+}
+
+.simulator-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--amarelo-solar), var(--amarelo-solar-escuro));
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.simulator-header h3 {
+  color: var(--azul-oceano);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+.simulator-header p {
+  color: var(--cinza-medio);
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.simulator-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .simulator-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.simulator-controls {
+  background: var(--cinza-claro);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: var(--azul-oceano);
+  font-size: 0.95rem;
+}
+
+.control-group input[type="range"] {
+  width: 100%;
+  height: 8px;
+  background: var(--branco);
+  border-radius: 999px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 2px solid var(--azul-oceano);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: var(--amarelo-solar);
+  border: 3px solid var(--azul-oceano);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--amarelo-solar);
+  border: 3px solid var(--azul-oceano);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.control-value {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--amarelo-solar-escuro);
+  background: var(--branco);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  border: 1px solid var(--cinza-claro);
+}
+
+.toggle-group {
+  display: flex;
+  background: var(--branco);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  gap: 4px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.6rem;
+  background: transparent;
+  color: var(--cinza-medio);
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all var(--transition-fast);
+  font-size: 0.85rem;
+}
+
+.toggle-btn.active {
+  background: var(--azul-oceano);
+  color: var(--branco);
+}
+
+.simulator-display {
+  background: linear-gradient(180deg, #e8f4f3 0%, #d4e8e5 100%);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.sim-canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, #87CEEB 0%, #5BA3C4 50%, #005C53 50%, #003F38 100%);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 3px solid var(--azul-oceano);
+}
+
+.sim-canvas-wrap canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sim-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+
+.stat-box {
+  background: var(--branco);
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--azul-oceano);
+}
+
+.stat-box.warn {
+  border-left-color: var(--vermelho-alerta);
+}
+
+.stat-box.ok {
+  border-left-color: var(--verde-ok);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--cinza-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--cinza-escuro);
+  font-family: 'Courier New', monospace;
+  margin-top: 0.2rem;
+}
+
+.chart-container {
+  background: var(--branco);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--cinza-claro);
+}
+
+.chart-container canvas {
+  width: 100%;
+  height: 180px;
+}
+
+/* Simulador 2 - Fotoelétrico */
+.photoelectric-scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 3px solid var(--azul-oceano);
+}
+
+/* ============================================================
+   PÁGINA 5 - IMPACTO SOCIAL
+   ============================================================ */
+.impact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+  .impact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.impact-card {
+  background: var(--branco);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, var(--azul-oceano), var(--amarelo-solar));
+}
+
+.impact-card h3 {
+  color: var(--azul-oceano);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.impact-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--amarelo-solar);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.scale-list {
+  list-style: none;
+  margin-top: 1rem;
+}
+
+.scale-list li {
+  padding: 0.7rem 0 0.7rem 2.2rem;
+  position: relative;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.scale-list li:last-child {
+  border-bottom: none;
+}
+
+.scale-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  top: 0.7rem;
+  color: var(--amarelo-solar-escuro);
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.cost-highlight {
+  display: inline-block;
+  background: var(--amarelo-solar);
+  color: var(--cinza-escuro);
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.main-footer {
+  background: var(--cinza-escuro);
+  color: var(--branco);
+  padding: 3rem 2rem 1.5rem;
+  margin-top: 3rem;
+}
+
+.footer-inner {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 800px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer-brand h4 {
+  color: var(--amarelo-solar);
+  font-size: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.footer-brand p {
+  opacity: 0.85;
+  line-height: 1.7;
+  max-width: 500px;
+}
+
+.footer-links h5 {
+  color: var(--amarelo-solar);
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-links a {
+  color: var(--branco);
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity var(--transition-fast);
+}
+
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  opacity: 1;
+  color: var(--amarelo-solar);
+  text-decoration: underline;
+}
+
+.footer-bottom {
+  max-width: 1300px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.footer-bottom a {
+  color: var(--amarelo-solar);
+}
+
+/* ============================================================
+   TOAST / NOTIFICAÇÕES
+   ============================================================ */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(150%);
+  background: var(--cinza-escuro);
+  color: var(--branco);
+  padding: 0.9rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 10001;
+  font-weight: 500;
+  transition: transform var(--transition-base);
+  border-left: 4px solid var(--amarelo-solar);
+  max-width: 90%;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-content .subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-badges,
+  .hero-cta {
+    justify-content: center;
+  }
+  .main-nav ul {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: var(--azul-oceano-escuro);
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    margin-top: 1rem;
+  }
+  .main-nav.open ul {
+    display: flex;
+  }
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .a11y-bar {
+    font-size: 0.75rem;
+  }
+  .a11y-bar button,
+  .a11y-bar a {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  .a11y-bar .divider {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .section {
+    padding: var(--space-lg) 1rem;
+  }
+  .hero {
+    padding: var(--space-lg) 1rem;
+  }
+  .physics-topic {
+    padding: 1.5rem;
+  }
+  .flow-decision {
+    min-width: 260px;
+    padding: 1.5rem 2rem;
+  }
+}
+
+/* Reduz movimento para quem prefere */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Print */
+@media print {
+  .a11y-bar,
+  .main-header,
+  .menu-toggle,
+  .hero-cta,
+  .simulator-controls {
+    display: none !important;
+  }
+  body {
+    color: #000;
+    background: #fff;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Skip link -->
+<a href="#main-content" class="skip-link" id="skipLink">Pular para o conteúdo principal</a>
+
+<!-- ============================================================
+     BARRA GLOBAL DE ACESSIBILIDADE
+     ============================================================ -->
+<div class="a11y-bar" role="region" aria-label="Ferramentas de acessibilidade">
+  <a href="#main-content" accesskey="1" aria-label="Ir para o conteúdo principal, atalho Alt mais 1">
+    <span aria-hidden="true">跳</span> Ir para o conteúdo <small>(Alt+1)</small>
+  </a>
+  <span class="divider" aria-hidden="true"></span>
+  <button id="btnContrast" type="button" aria-pressed="false" aria-label="Ativar alto contraste">
+    <span aria-hidden="true">♿</span> Alto Contraste
+  </button>
+  <span class="divider" aria-hidden="true"></span>
+  <button id="btnFontUp" type="button" aria-label="Aumentar tamanho da fonte">
+    <span aria-hidden="true">🅰️</span> Aumentar Fonte
+  </button>
+  <button id="btnFontDown" type="button" aria-label="Diminuir tamanho da fonte">
+    <span aria-hidden="true">🅰</span> Diminuir Fonte
+  </button>
+  <span class="divider" aria-hidden="true"></span>
+  <button id="btnDyslexic" type="button" aria-pressed="false" aria-label="Ativar fonte para dislexia">
+    <span aria-hidden="true">📖</span> Fonte Dislexia
+  </button>
+  <span class="divider" aria-hidden="true"></span>
+  <button id="btnVoice" type="button" aria-pressed="false" aria-label="Ativar leitor de voz">
+    <span aria-hidden="true">🔊</span> Leitor de Voz
+  </button>
+</div>
+
+<!-- ============================================================
+     HEADER / NAVEGAÇÃO
+     ============================================================ -->
+<header class="main-header" role="banner">
+  <div class="header-inner">
+    <a href="#inicio" class="brand" aria-label="Início - Piscina Térmica e Tecnociência">
+      <span class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="9" r="4" fill="#005C53"/>
+          <path d="M3 18 Q 7 14, 12 18 T 21 18" stroke="#005C53" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M3 21 Q 7 17, 12 21 T 21 21" stroke="#005C53" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        Piscina Térmica & Tecnociência
+        <small>Colégio Estadual do Paraná</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav">
+      ☰ <span>Menu</span>
+    </button>
+
+    <nav class="main-nav" id="mainNav" aria-label="Navegação principal">
+      <ul role="list">
+        <li><a href="#projeto"><span class="num">01</span> O Projeto (CEP)</a></li>
+        <li><a href="#tecnociencia"><span class="num">02</span> Tecnociência & Física</a></li>
+        <li><a href="#robotica"><span class="num">03</span> Robótica & Código</a></li>
+        <li><a href="#laboratorio"><span class="num">04</span> Laboratório Interativo</a></li>
+        <li><a href="#impacto"><span class="num">05</span> Impacto Social & Futuro</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================================================
+     CONTEÚDO PRINCIPAL
+     ============================================================ -->
+<main id="main-content">
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="inicio" aria-labelledby="heroTitle">
+    <div class="hero-inner">
+      <div class="hero-content">
+        <div class="hero-badges" role="list">
+          <span class="badge" role="listitem">🏊 Piscina Térmica</span>
+          <span class="badge" role="listitem">♿ Acessibilidade</span>
+          <span class="badge" role="listitem">☀️ Sustentabilidade</span>
+          <span class="badge" role="listitem">🤖 Robótica</span>
+        </div>
+
+        <h1 id="heroTitle">
+          Tecnologia e <span class="highlight">Inclusão</span><br>
+          na Piscina do CEP
+        </h1>
+
+        <p class="subtitle">
+          Um sistema automatizado de controle térmico focado em acessibilidade,
+          conforto e sustentabilidade — unindo física, robótica e cidadania.
+        </p>
+
+        <div class="hero-cta">
+          <a href="#projeto" class="btn btn-primary">
+            Conhecer o Projeto →
+          </a>
+          <a href="#laboratorio" class="btn btn-secondary">
+            🧪 Ver Simuladores
+          </a>
+        </div>
+      </div>
+
+      <div class="prototype-visual" role="img" aria-label="Ilustração animada do protótipo: piscina com coletor solar, sensor de temperatura submerso e display OLED mostrando a leitura em tempo real.">
+        <div class="pool-scene">
+          <div class="sun" aria-hidden="true"></div>
+          <div class="solar-panel" aria-hidden="true"></div>
+          <div class="water-surface" aria-hidden="true">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+          </div>
+          <div class="sensor-probe" aria-hidden="true"></div>
+          <div class="temp-display" aria-hidden="true">
+            <span id="heroTemp">28.5°C</span>
+          </div>
+          <div class="bubbles" aria-hidden="true" id="bubblesContainer"></div>
+        </div>
+        <p class="prototype-caption">
+          Protótipo em funcionamento — legenda e audiodescrição ativáveis na barra de acessibilidade.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PÁGINA 1 - O PROJETO ========== -->
+  <section class="section" id="projeto" aria-labelledby="projetoTitle">
+    <div class="section-header">
+      <span class="section-tag">Página 01</span>
+      <h2 class="section-title" id="projetoTitle">O Projeto no Colégio Estadual do Paraná</h2>
+      <p class="section-subtitle">
+        Entenda o problema real, a solução desenvolvida e por que ela importa para a comunidade escolar.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">🎯</div>
+        <h3>O Desafio Real</h3>
+        <p>
+          A piscina do Colégio Estadual do Paraná é um espaço fundamental para a prática
+          de atividades físicas, esporte e lazer. No entanto, a ausência de um sistema
+          eficiente de controle térmico faz com que a temperatura da água dependa de
+          condições climáticas e ajustes manuais pouco precisos.
+        </p>
+      </article>
+
+      <article class="card">
+        <div class="card-icon" aria-hidden="true">❄️</div>
+        <h3>O Impacto no Dia a Dia</h3>
+        <p>
+          Em dias frios, a água gelada gera desconforto e impede a participação de
+          diversos estudantes. A temperatura inadequada é uma <strong>barreira de
+          acessibilidade</strong>: alunos com sensibilidade ao frio, restrições de
+          mobilidade ou condições de saúde específicas acabam excluídos das aulas aquáticas.
+        </p>
+      </article>
+    </div>
+
+    <div class="highlight-block" role="region" aria-label="A solução e seus benefícios">
+      <h3>💡 A Solução e Sua Importância</h3>
+      <p>
+        Para resolver essa limitação, desenvolvemos uma proposta de
+        <strong>controle térmico automatizado</strong>. Utilizando tecnologia acessível
+        e conceitos científicos aplicados, o projeto busca:
+      </p>
+      <ul>
+        <li>
+          <strong>Garantir a inclusão:</strong> permitir a participação de 100% dos
+          estudantes nas atividades aquáticas com conforto térmico.
+        </li>
+        <li>
+          <strong>Eficiência energética:</strong> acionar o aquecimento apenas quando a
+          temperatura estiver abaixo do limite ideal, evitando desperdício.
+        </li>
+        <li>
+          <strong>Aprendizado prático:</strong> conectar robótica, programação e física
+          a uma dor real da comunidade escolar.
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ========== PÁGINA 2 - TECNOCIÊNCIA ========== -->
+  <section class="section section-alt" id="tecnociencia" aria-labelledby="tecTitle">
+    <div class="section-header">
+      <span class="section-tag">Página 02</span>
+      <h2 class="section-title" id="tecTitle">Tecnociência & Física Aplicada</h2>
+      <p class="section-subtitle">
+        A teoria da sala de aula transformada em solução prática. Como a energia térmica
+        se move e como podemos controlá-la.
+      </p>
+    </div>
+
+    <article class="physics-topic">
+      <h3>
+        <span class="topic-number" aria-hidden="true">1</span>
+        Radiação do Corpo Negro e Coletores Solares
+      </h3>
+      <div class="concept">
+        <span class="label">📘 O Conceito</span>
+        <p>
+          Na física, um <strong>"corpo negro"</strong> é uma superfície ideal que absorve
+          toda a radiação eletromagnética que incide sobre ela, sem refletir luz. É o
+          absorvedor perfeito.
+        </p>
+      </div>
+      <div class="application">
+        <span class="label">🔧 Aplicação no Projeto</span>
+        <p>
+          Os coletores solares térmicos utilizam superfícies escuras que se comportam de
+          forma próxima a um corpo negro. Eles absorvem a radiação visível e infravermelha
+          do Sol e a convertem em calor, transferindo essa energia diretamente para a água
+          que circula pelo sistema.
+        </p>
+      </div>
+    </article>
+
+    <article class="physics-topic">
+      <h3>
+        <span class="topic-number" aria-hidden="true">2</span>
+        Perda de Calor por Infravermelho e a Capa Térmica
+      </h3>
+      <div class="concept">
+        <span class="label">📘 O Conceito</span>
+        <p>
+          Todos os corpos aquecidos emitem energia sob a forma de <strong>radiação
+          infravermelha</strong>. Quanto mais quente o corpo, mais intensa é essa emissão.
+        </p>
+      </div>
+      <div class="application">
+        <span class="label">🔧 Aplicação no Projeto</span>
+        <p>
+          Durante a noite ou em dias frios, a água da piscina perde energia para a
+          atmosfera emitindo radiação infravermelha de onda longa, além das perdas por
+          evaporação e convecção.
+        </p>
+        <p style="margin-top: 0.6rem;">
+          <strong>A Solução:</strong> esse fenômeno justifica o uso da <em>Capa Térmica</em>.
+          Ela atua como uma barreira física e radiativa que impede a evaporação e "prende"
+          a radiação infravermelha, reduzindo drasticamente a perda de calor e economizando
+          a energia que seria gasta pelo aquecedor.
+        </p>
+      </div>
+    </article>
+
+    <article class="physics-topic">
+      <h3>
+        <span class="topic-number" aria-hidden="true">3</span>
+        Efeito Fotoelétrico e Painéis Fotovoltaicos
+      </h3>
+      <div class="concept">
+        <span class="label">📘 O Conceito</span>
+        <p>
+          Descrito por <strong>Albert Einstein</strong>, o efeito fotoelétrico ocorre quando
+          fótons de luz atingem um material condutor e ejetam elétrons, gerando uma
+          corrente elétrica.
+        </p>
+      </div>
+      <div class="application">
+        <span class="label">🔧 Aplicação no Projeto</span>
+        <p>
+          Enquanto o coletor térmico gera calor direto, os painéis fotovoltaicos utilizam
+          o efeito fotoelétrico para gerar energia elétrica. Essa eletricidade alimenta o
+          microcontrolador do projeto, o visor e as bombas de circulação da água.
+        </p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ========== PÁGINA 3 - ROBÓTICA ========== -->
+  <section class="section" id="robotica" aria-labelledby="robTitle">
+    <div class="section-header">
+      <span class="section-tag">Página 03</span>
+      <h2 class="section-title" id="robTitle">Robótica & Código</h2>
+      <p class="section-subtitle">
+        O cérebro eletrônico do protótipo: hardware, sensores e a lógica de programação
+        que toma decisões em tempo real.
+      </p>
+    </div>
+
+    <h3 style="text-align:center; color: var(--azul-oceano); margin-top: 2rem;">
+      🧠 O Cérebro Eletrônico do Protótipo
+    </h3>
+    <p style="text-align:center; max-width: 700px; margin: 0.5rem auto 0; color: var(--cinza-medio);">
+      Integramos componentes eletrônicos acessíveis para criar um ciclo autônomo de
+      monitoramento e decisão.
+    </p>
+
+    <div class="component-grid">
+      <div class="component">
+        <div class="component-visual" aria-hidden="true">🔌</div>
+        <h4>Arduino Uno</h4>
+        <p>Microcontrolador responsável por processar o código e tomar decisões em tempo real.</p>
+      </div>
+      <div class="component">
+        <div class="component-visual" aria-hidden="true">🌡️</div>
+        <h4>Sensor DS18B20</h4>
+        <p>Sensor de temperatura submersível e blindado que mede os graus da água continuamente.</p>
+      </div>
+      <div class="component">
+        <div class="component-visual" aria-hidden="true">⚡</div>
+        <h4>Módulo Relé 5V</h4>
+        <p>Interruptor eletrônico que aciona ou desliga o sistema de aquecimento automaticamente.</p>
+      </div>
+      <div class="component">
+        <div class="component-visual" aria-hidden="true">📺</div>
+        <h4>Display OLED</h4>
+        <p>Interface visual clara que exibe a temperatura atual e o status do sistema.</p>
+      </div>
+    </div>
+
+    <div class="flowchart" role="figure" aria-label="Fluxograma do algoritmo de controle térmico">
+      <h3 class="flowchart-title">🔄 Lógica de Programação — O Algoritmo</h3>
+      <div class="flow">
+        <div class="flow-node flow-start">Início</div>
+        <div class="flow-arrow" aria-hidden="true">▼</div>
+        <div class="flow-node flow-process">Ler Sensor DS18B20</div>
+        <div class="flow-arrow" aria-hidden="true">▼</div>
+        <div class="flow-node flow-process">Exibir Temperatura no Display OLED</div>
+        <div class="flow-arrow" aria-hidden="true">▼</div>
+        <div class="flow-node flow-decision" role="img" aria-label="Decisão: temperatura menor que o valor ideal?">
+          <div class="flow-decision-text">Temperatura &lt; Valor Ideal?</div>
+        </div>
+
+        <div class="flow-branch">
+          <div class="flow-branch-side">
+            <span class="flow-branch-label">SIM</span>
+            <div class="flow-arrow" aria-hidden="true">▼</div>
+            <div class="flow-node flow-action-yes">Acionar Relé<br><small>(Ligar Aquecimento)</small></div>
+          </div>
+          <div class="flow-branch-side">
+            <span class="flow-branch-label">NÃO</span>
+            <div class="flow-arrow" aria-hidden="true">▼</div>
+            <div class="flow-node flow-action-no">Desligar Relé<br><small>(Economizar Energia)</small></div>
+          </div>
+        </div>
+
+        <div class="flow-arrow" aria-hidden="true" style="margin-top: 1rem;">▼</div>
+        <div class="flow-node flow-process">Aguardar Intervalo e Repetir Loop 🔁</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PÁGINA 4 - LABORATÓRIO ========== -->
+  <section class="section section-alt" id="laboratorio" aria-labelledby="labTitle">
+    <div class="section-header">
+      <span class="section-tag">Página 04</span>
+      <h2 class="section-title" id="labTitle">Laboratório Interativo</h2>
+      <p class="section-subtitle">
+        Experimente os conceitos físicos em simuladores visuais. Ajuste os parâmetros
+        e veja o que acontece em tempo real.
+      </p>
+    </div>
+
+    <!-- SIMULADOR 1 -->
+    <div class="simulator-container" role="region" aria-labelledby="sim1Title">
+      <div class="simulator-header">
+        <div class="simulator-icon" aria-hidden="true">🧪</div>
+        <div>
+          <h3 id="sim1Title">Simulador 1: Perda Térmica e Capa Protetora</h3>
+          <p>Ajuste a temperatura ambiente e escolha usar ou não a capa térmica.</p>
+        </div>
+      </div>
+
+      <div class="simulator-layout">
+        <div class="simulator-controls">
+          <div class="control-group">
+            <label for="tempAmbiente">Temperatura Ambiente</label>
+            <input type="range" id="tempAmbiente" min="5" max="35" value="15" step="1" aria-valuemin="5" aria-valuemax="35" aria-valuenow="15">
+            <div class="control-value"><span id="tempAmbienteVal">15</span>°C</div>
+          </div>
+
+          <div class="control-group">
+            <label for="tempAgua">Temperatura Inicial da Água</label>
+            <input type="range" id="tempAgua" min="20" max="40" value="30" step="0.5" aria-valuemin="20" aria-valuemax="40" aria-valuenow="30">
+            <div class="control-value"><span id="tempAguaVal">30.0</span>°C</div>
+          </div>
+
+          <div class="control-group">
+            <label id="capaLabel">Capa Térmica</label>
+            <div class="toggle-group" role="radiogroup" aria-labelledby="capaLabel">
+              <button type="button" class="toggle-btn active" data-capa="com" role="radio" aria-checked="true">Com Capa</button>
+              <button type="button" class="toggle-btn" data-capa="sem" role="radio" aria-checked="false">Sem Capa</button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btnResetSim1" style="margin-top: 0.5rem;">
+            🔄 Reiniciar Simulação
+          </button>
+        </div>
+
+        <div class="simulator-display">
+          <div class="sim-canvas-wrap">
+            <canvas id="canvasSim1" aria-label="Animação da piscina mostrando perda ou retenção de calor"></canvas>
+          </div>
+
+          <div class="sim-stats">
+            <div class="stat-box">
+              <div class="stat-label">Temp. Atual da Água</div>
+              <div class="stat-value" id="statTempAgua">30.0°C</div>
+            </div>
+            <div class="stat-box" id="statPerdaBox">
+              <div class="stat-label">Perda de Calor</div>
+              <div class="stat-value" id="statPerda">Baixa</div>
+            </div>
+            <div class="stat-box ok">
+              <div class="stat-label">Economia Estimada</div>
+              <div class="stat-value" id="statEconomia">R$ 0,00</div>
+            </div>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="chartSim1" aria-label="Gráfico da curva de resfriamento da água ao longo do tempo"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULADOR 2 -->
+    <div class="simulator-container" role="region" aria-labelledby="sim2Title">
+      <div class="simulator-header">
+        <div class="simulator-icon" aria-hidden="true">☀️</div>
+        <div>
+          <h3 id="sim2Title">Simulador 2: Efeito Fotoelétrico na Prática</h3>
+          <p>Controle o comprimento de onda e a intensidade da luz. Observe a liberação de elétrons.</p>
+        </div>
+    </div>
+
+      <div class="simulator-layout">
+        <div class="simulator-controls">
+          <div class="control-group">
+            <label for="comprimentoOnda">Comprimento de Onda (nm)</label>
+            <input type="range" id="comprimentoOnda" min="300" max="800" value="500" step="10">
+            <div class="control-value">
+              <span id="comprimentoOndaVal">500</span> nm —
+              <span id="corOnda" style="font-weight:700;">Verde</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="intensidadeSolar">Intensidade Solar</label>
+            <input type="range" id="intensidadeSolar" min="10" max="100" value="60" step="5">
+            <div class="control-value"><span id="intensidadeVal">60</span>%</div>
+          </div>
+
+          <div class="control-group" style="background: var(--branco); padding: 0.8rem; border-radius: var(--radius-sm);">
+            <div class="stat-label">Limiar do Material</div>
+            <div class="stat-value" style="font-size: 1rem;">550 nm</div>
+            <small style="color: var(--cinza-medio); display:block; margin-top:0.3rem;">
+              Abaixo deste valor, elétrons são ejetados.
+            </small>
+          </div>
+
+          <button type="button" class="btn btn-primary" id="btnResetSim2" style="margin-top: 0.5rem;">
+            🔄 Reiniciar Simulação
+          </button>
+        </div>
+
+        <div class="simulator-display">
+          <div class="photoelectric-scene">
+            <canvas id="canvasSim2" aria-label="Animação do efeito fotoelétrico com fótons, placa e elétrons"></canvas>
+          </div>
+
+          <div class="sim-stats">
+            <div class="stat-box" id="statFreqBox">
+              <div class="stat-label">Frequência</div>
+              <div class="stat-value" id="statFreq">Alta</div>
+            </div>
+            <div class="stat-box" id="statEletBox">
+              <div class="stat-label">Elétrons Ejetados</div>
+              <div class="stat-value" id="statEletrons">0 / s</div>
+            </div>
+            <div class="stat-box" id="statBombaBox">
+              <div class="stat-label">Bomba de Água</div>
+              <div class="stat-value" id="statBomba">⏸ Desligada</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PÁGINA 5 - IMPACTO ========== -->
+  <section class="section" id="impacto" aria-labelledby="impactoTitle">
+    <div class="section-header">
+      <span class="section-tag">Página 05</span>
+      <h2 class="section-title" id="impactoTitle">Impacto Social & Escalabilidade</h2>
+      <p class="section-subtitle">
+        Da sala de aula para o mundo real: como um protótipo de 5 litros pode transformar
+        uma piscina de 2.500 m³.
+      </p>
+    </div>
+
+    <div class="impact-grid">
+      <article class="impact-card">
+        <h3>
+          <span class="impact-icon" aria-hidden="true">♿</span>
+          Acessibilidade e Cidadania
+        </h3>
+        <p>
+          A tecnologia deve servir para <strong>remover barreiras</strong>. Garantir que
+          a água da piscina do CEP esteja na temperatura adequada significa assegurar que
+          estudantes com deficiência motora, dores crônicas ou maior sensibilidade térmica
+          exerçam seu direito de participar das aulas com dignidade e conforto.
+        </p>
+        <p style="margin-top: 1rem;">
+          Não se trata apenas de conforto — trata-se de <strong>equidade</strong>.
+          Cada grau controlado é um estudante a mais dentro d'água.
+        </p>
+      </article>
+
+      <article class="impact-card">
+        <h3>
+          <span class="impact-icon" aria-hidden="true">📈</span>
+          Do Protótipo à Piscina Real
+        </h3>
+        <p>
+          <strong>Viabilidade do Protótipo:</strong> custo reduzido entre
+          <span class="cost-highlight">R$ 90,00</span> e
+          <span class="cost-highlight">R$ 155,00</span>, demonstrando ser uma solução
+          viável para ensino de robótica nas escolas públicas.
+        </p>
+        <p style="margin-top: 1rem;">
+          <strong>Escalabilidade para o CEP:</strong> a lógica de funcionamento
+          (medir → processar → acionar) permanece idêntica. Para a piscina de
+          2.500 m³ do colégio, o sistema exigirá:
+        </p>
+        <ul class="scale-list">
+          <li>Sensores de nível industrial e contatores elétricos de potência.</li>
+          <li>Integração de bombas de calor de alta eficiência aliadas a coletores solares.</li>
+          <li>Uso obrigatório de capa térmica noturna para contenção da radiação infravermelha.</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="highlight-block" style="margin-top: 3rem;">
+      <h3>🌍 Uma Pequena Ideia, Um Grande Impacto</h3>
+      <p>
+        Este projeto mostra que a ciência não precisa ficar presa aos livros. Ela pode
+        ser usada para resolver problemas reais da comunidade, formando cidadãos mais
+        críticos, criativos e conscientes do poder transformador da tecnologia.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="main-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <h4>🏊 Piscina Térmica & Tecnociência</h4>
+      <p>
+        Colégio Estadual do Paraná — Projeto de Automação, Tecnociência e Acessibilidade.
+        Desenvolvido com foco em Inclusão Digital e Sustentabilidade.
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <h5>Recursos</h5>
+      <ul>
+        <li><a href="#projeto">O Projeto</a></li>
+        <li><a href="#tecnociencia">Tecnociência</a></li>
+        <li><a href="#robotica">Robótica</a></li>
+        <li><a href="#laboratorio">Simuladores</a></li>
+        <li><a href="#impacto">Impacto Social</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h5>Contato & Código</h5>
+      <ul>
+        <li><a href="https://github.com" target="_blank" rel="noopener">💻 Código Open Source no GitHub</a></li>
+        <li><a href="#" onclick="alert('Documentação em PDF será disponibilizada em breve.'); return false;">📄 Baixar Documentação Acessível (PDF)</a></li>
+        <li><a href="mailto:contato@cep.pr.gov.br">✉️ Contato / Feedback</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>
+      © 2026 Colégio Estadual do Paraná · Projeto educacional de livre acesso ·
+      Feito com 💛 por estudantes e professores ·
+      <a href="#inicio">Voltar ao topo ↑</a>
+    </p>
+  </div>
+</footer>
+
+<!-- Toast de notificações -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ============================================================
+   UTILITÁRIOS
+   ============================================================ */
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+function showToast(msg, duration = 2800) {
+  const toast = $('#toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+/* ============================================================
+   MENU MOBILE
+   ============================================================ */
+const menuToggle = $('#menuToggle');
+const mainNav = $('#mainNav');
+menuToggle?.addEventListener('click', () => {
+  const isOpen = mainNav.classList.toggle('open');
+  menuToggle.setAttribute('aria-expanded', isOpen);
+});
+
+// Fecha menu ao clicar em link
+$$('#mainNav a').forEach(a => {
+  a.addEventListener('click', () => {
+    mainNav.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  });
+});
+
+/* ============================================================
+   ACESSIBILIDADE - CONTRASTE
+   ============================================================ */
+const btnContrast = $('#btnContrast');
+btnContrast?.addEventListener('click', () => {
+  document.body.classList.toggle('high-contrast');
+  const on = document.body.classList.contains('high-contrast');
+  btnContrast.setAttribute('aria-pressed', on);
+  showToast(on ? '♿ Alto contraste ativado' : '♿ Alto contraste desativado');
+  try { localStorage.setItem('highContrast', on ? '1' : '0'); } catch(e){}
+});
+
+/* ============================================================
+   ACESSIBILIDADE - TAMANHO DA FONTE
+   ============================================================ */
+let fontScale = 1;
+const FONT_STEP = 0.1;
+const FONT_MIN = 0.8;
+const FONT_MAX = 1.6;
+
+function applyFontScale() {
+  document.documentElement.style.setProperty('--font-scale', fontScale);
+}
+
+$('#btnFontUp')?.addEventListener('click', () => {
+  if (fontScale < FONT_MAX) {
+    fontScale = Math.min(FONT_MAX, +(fontScale + FONT_STEP).toFixed(2));
+    applyFontScale();
+    showToast(`🅰️ Fonte: ${Math.round(fontScale * 100)}%`);
+  } else {
+    showToast('Tamanho máximo atingido');
+  }
+});
+
+$('#btnFontDown')?.addEventListener('click', () => {
+  if (fontScale > FONT_MIN) {
+    fontScale = Math.max(FONT_MIN, +(fontScale - FONT_STEP).toFixed(2));
+    applyFontScale();
+    showToast(`🅰️ Fonte: ${Math.round(fontScale * 100)}%`);
+  } else {
+    showToast('Tamanho mínimo atingido');
+  }
+});
+
+/* ============================================================
+   ACESSIBILIDADE - FONTE DISLEXIA
+   ============================================================ */
+const btnDyslexic = $('#btnDyslexic');
+btnDyslexic?.addEventListener('click', () => {
+  document.body.classList.toggle('dyslexic-font');
+  const on = document.body.classList.contains('dyslexic-font');
+  btnDyslexic.setAttribute('aria-pressed', on);
+  showToast(on ? '📖 Fonte para dislexia ativada' : '📖 Fonte padrão restaurada');
+});
+
+/* ============================================================
+   ACESSIBILIDADE - LEITOR DE VOZ (Web Speech API)
+   ============================================================ */
+const btnVoice = $('#btnVoice');
+let voiceEnabled = false;
+let currentUtterance = null;
+
+btnVoice?.addEventListener('click', () => {
+  if (!('speechSynthesis' in window)) {
+    showToast('❌ Seu navegador não suporta leitura de voz');
+    return;
+  }
+  voiceEnabled = !voiceEnabled;
+  btnVoice.setAttribute('aria-pressed', voiceEnabled);
+  if (voiceEnabled) {
+    showToast('🔊 Leitor de voz ativado — clique em qualquer texto para ouvir');
+    document.addEventListener('click', speakOnClick);
+  } else {
+    showToast('🔇 Leitor de voz desativado');
+    document.removeEventListener('click', speakOnClick);
+    window.speechSynthesis.cancel();
+  }
+});
+
+function speakOnClick(e) {
+  const target = e.target;
+  // Só lê se for um elemento de texto "importante"
+  const textEls = ['p', 'h1', 'h2', 'h3', 'h4', 'li', 'span', 'a', 'strong', 'em'];
+  if (!textEls.includes(target.tagName.toLowerCase())) return;
+  const text = target.innerText.trim();
+  if (!text) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'pt-BR';
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  // Tenta voz em português
+  const voices = window.speechSynthesis.getVoices();
+  const ptVoice = voices.find(v => v.lang.startsWith('pt'));
+  if (ptVoice) utter.voice = ptVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+// Pré-carrega vozes
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+/* ============================================================
+   RESTAURAR PREFERÊNCIAS SALVAS
+   ============================================================ */
+try {
+  if (localStorage.getItem('highContrast') === '1') {
+    document.body.classList.add('high-contrast');
+    btnContrast?.setAttribute('aria-pressed', 'true');
+  }
+} catch(e){}
+
+/* ============================================================
+   HERO - BOLHAS E TEMPERATURA ANIMADA
+   ============================================================ */
+const bubblesContainer = $('#bubblesContainer');
+function createBubble() {
+  if (!bubblesContainer) return;
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.style.left = Math.random() * 100 + '%';
+  b.style.animationDuration = (3 + Math.random() * 4) + 's';
+  b.style.width = b.style.height = (4 + Math.random() * 8) + 'px';
+  b.style.animationDelay = Math.random() * 2 + 's';
+  bubblesContainer.appendChild(b);
+  setTimeout(() => b.remove(), 7000);
+}
+setInterval(createBubble, 600);
+
+// Temperatura oscilante no hero
+const heroTemp = $('#heroTemp');
+let heroT = 28.5;
+setInterval(() => {
+  heroT += (Math.random() - 0.5) * 0.3;
+  heroT = Math.max(26, Math.min(30, heroT));
+  if (heroTemp) heroTemp.textContent = heroT.toFixed(1) + '°C';
+}, 1500);
+
+/* ============================================================
+   SIMULADOR 1 - PERDA TÉRMICA
+   ============================================================ */
+(() => {
+  const canvas = $('#canvasSim1');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const inputTempAmb = $('#tempAmbiente');
+  const inputTempAgua = $('#tempAgua');
+  const valTempAmb = $('#tempAmbienteVal');
+  const valTempAgua = $('#tempAguaVal');
+  const statTempAgua = $('#statTempAgua');
+  const statPerda = $('#statPerda');
+  const statPerdaBox = $('#statPerdaBox');
+  const statEconomia = $('#statEconomia');
+
+  let tempAmb = +inputTempAmb.value;
+  let tempAgua = +inputTempAgua.value;
+  let tempInicial = tempAgua;
+  let comCapa = true;
+
+  const chartCanvas = $('#chartSim1');
+  const chartCtx = chartCanvas.getContext('2d');
+  let history = [];
+  const MAX_HISTORY = 120;
+
+  // Partículas de radiação IR
+  let irParticles = [];
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    const rect2 = chartCanvas.getBoundingClientRect();
+    chartCanvas.width = rect2.width;
+    chartCanvas.height = 180;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  inputTempAmb.addEventListener('input', e => {
+    tempAmb = +e.target.value;
+    valTempAmb.textContent = tempAmb;
+  });
+  inputTempAgua.addEventListener('input', e => {
+    tempAgua = +e.target.value;
+    tempInicial = tempAgua;
+    valTempAgua.textContent = tempAgua.toFixed(1);
+    history = [];
+  });
+
+  $$('.toggle-btn[data-capa]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.toggle-btn[data-capa]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      comCapa = btn.dataset.capa === 'com';
+    });
+  });
+
+  $('#btnResetSim1').addEventListener('click', () => {
+    tempAgua = +inputTempAgua.value;
+    tempInicial = tempAgua;
+    history = [];
+    irParticles = [];
+  });
+
+  // Loop de simulação
+  let lastSim = performance.now();
+  function simStep(now) {
+    const dt = (now - lastSim) / 1000;
+    lastSim = now;
+
+    // Lei de resfriamento de Newton simplificada
+    const diff = tempAgua - tempAmb;
+    const k = comCapa ? 0.005 : 0.025; // com capa perde muito menos
+    if (diff > 0) {
+      tempAgua -= k * diff * dt * 10;
+      if (tempAgua < tempAmb) tempAgua = tempAmb;
+    }
+
+    // Histórico
+    if (history.length === 0 || now - history[history.length-1].t > 500) {
+      history.push({ t: now, temp: tempAgua });
+      if (history.length > MAX_HISTORY) history.shift();
+    }
+
+    // Partículas IR
+    if (!comCapa && diff > 0.5 && Math.random() < 0.4) {
+      irParticles.push({
+        x: canvas.width * (0.2 + Math.random() * 0.6),
+        y: canvas.height * 0.5,
+        vy: -0.8 - Math.random() * 1.2,
+        life: 1,
+        size: 2 + Math.random() * 3
+      });
+    }
+    irParticles.forEach(p => {
+      p.y += p.vy;
+      p.life -= 0.012;
+    });
+    irParticles = irParticles.filter(p => p.life > 0 && p.y > 0);
+
+    draw();
+    updateStats();
+    drawChart();
+    requestAnimationFrame(simStep);
+  }
+
+  function draw() {
+    const W = canvas.width, H = canvas.height;
+    // Céu
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+    const skyTemp = Math.max(0, Math.min(1, (tempAmb - 5) / 30));
+    skyGrad.addColorStop(0, `hsl(${200 - skyTemp * 20}, ${60 + skyTemp * 20}%, ${70 - skyTemp * 20}%)`);
+    skyGrad.addColorStop(1, `hsl(${200 - skyTemp * 20}, ${50 + skyTemp * 20}%, ${50 - skyTemp * 10}%)`);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H * 0.5);
+
+    // Água
+    const waterGrad = ctx.createLinearGradient(0, H * 0.5, 0, H);
+    const waterHue = 170 + (tempAgua - 20) * 1.5;
+    waterGrad.addColorStop(0, `hsl(${waterHue}, 60%, 40%)`);
+    waterGrad.addColorStop(1, `hsl(${waterHue}, 70%, 25%)`);
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(0, H * 0.5, W, H * 0.5);
+
+    // Ondas
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    const t = performance.now() / 500;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 10) {
+        const y = H * 0.5 + Math.sin(x / 30 + t + i) * 3 + i * 8;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Capa térmica
+    if (comCapa) {
+      ctx.fillStyle = 'rgba(40, 40, 60, 0.85)';
+      ctx.fillRect(0, H * 0.48, W, 12);
+      ctx.fillStyle = 'rgba(244, 162, 97, 0.6)';
+      ctx.fillRect(0, H * 0.48, W, 3);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('🛡️ CAPA TÉRMICA', 10, H * 0.48 - 4);
+    }
+
+    // Partículas IR (saindo da água)
+    irParticles.forEach(p => {
+      ctx.fillStyle = `rgba(255, 80, 80, ${p.life})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      // Rastro
+      ctx.strokeStyle = `rgba(255, 80, 80, ${p.life * 0.5})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x, p.y + 10);
+      ctx.stroke();
+    });
+
+    // Termômetro lateral
+    const termX = W - 40;
+    const termH = H * 0.4;
+    const termY = H * 0.55;
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillRect(termX - 8, termY, 16, termH);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(termX - 8, termY, 16, termH);
+    const fillH = ((tempAgua - 5) / 35) * termH;
+    const termGrad = ctx.createLinearGradient(0, termY + termH - fillH, 0, termY + termH);
+    termGrad.addColorStop(0, '#F4A261');
+    termGrad.addColorStop(1, '#D62828');
+    ctx.fillStyle = termGrad;
+    ctx.fillRect(termX - 6, termY + termH - fillH, 12, fillH);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(tempAgua.toFixed(1) + '°C', termX, termY - 6);
+    ctx.textAlign = 'left';
+  }
+
+  function updateStats() {
+    statTempAgua.textContent = tempAgua.toFixed(1) + '°C';
+    const diff = tempInicial - tempAgua;
+    let perda = 'Baixa';
+    let classe = 'ok';
+    if (diff > 3) { perda = 'Alta'; classe = 'warn'; }
+    else if (diff > 1) { perda = 'Média'; classe = ''; }
+    statPerda.textContent = perda;
+    statPerdaBox.className = 'stat-box ' + classe;
+
+    // Economia: calcula diferença entre com e sem capa
+    const perdaSemCapa = 0.025 * (tempInicial - tempAmb);
+    const perdaComCapa = 0.005 * (tempInicial - tempAmb);
+    const economiaKwh = Math.max(0, (perdaSemCapa - perdaComCapa)) * 10; // simplificado
+    const custoKwh = 0.85;
+    const economiaR$ = (economiaKwh * custoKwh * (history.length / 60)).toFixed(2);
+    statEconomia.textContent = 'R$ ' + economiaR$;
+  }
+
+  function drawChart() {
+    const W = chartCanvas.width, H = chartCanvas.height;
+    chartCtx.clearRect(0, 0, W, H);
+
+    // Grid
+    chartCtx.strokeStyle = 'rgba(0,0,0,0.08)';
+    chartCtx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (H / 4) * i;
+      chartCtx.beginPath();
+      chartCtx.moveTo(0, y);
+      chartCtx.lineTo(W, y);
+      chartCtx.stroke();
+    }
+
+    if (history.length < 2) return;
+
+    const minT = Math.min(...history.map(h => h.temp), tempAmb);
+    const maxT = Math.max(...history.map(h => h.temp), 35);
+    const range = maxT - minT || 1;
+
+    // Linha ideal
+    const idealY = H - ((28 - minT) / range) * H;
+    chartCtx.strokeStyle = 'rgba(42, 157, 143, 0.5)';
+    chartCtx.setLineDash([4, 4]);
+    chartCtx.beginPath();
+    chartCtx.moveTo(0, idealY);
+    chartCtx.lineTo(W, idealY);
+    chartCtx.stroke();
+    chartCtx.setLineDash([]);
+    chartCtx.fillStyle = '#2A9D8F';
+    chartCtx.font = 'bold 10px sans-serif';
+    chartCtx.fillText('Ideal: 28°C', 5, idealY - 3);
+
+    // Curva real
+    chartCtx.strokeStyle = '#005C53';
+    chartCtx.lineWidth = 2.5;
+    chartCtx.beginPath();
+    history.forEach((h, i) => {
+      const x = (i / (MAX_HISTORY - 1)) * W;
+      const y = H - ((h.temp - minT) / range) * H;
+      if (i === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    });
+    chartCtx.stroke();
+
+    // Preenchimento
+    chartCtx.lineTo(W, H);
+    chartCtx.lineTo(0, H);
+    chartCtx.closePath();
+    chartCtx.fillStyle = 'rgba(0, 92, 83, 0.15)';
+    chartCtx.fill();
+  }
+
+  requestAnimationFrame(simStep);
+})();
+
+/* ============================================================
+   SIMULADOR 2 - EFEITO FOTOELÉTRICO
+   ============================================================ */
+(() => {
+  const canvas = $('#canvasSim2');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const inputCO = $('#comprimentoOnda');
+  const inputInt = $('#intensidadeSolar');
+  const valCO = $('#comprimentoOndaVal');
+  const valInt = $('#intensidadeVal');
+  const corOnda = $('#corOnda');
+  const statFreq = $('#statFreq');
+  const statFreqBox = $('#statFreqBox');
+  const statElet = $('#statEletrons');
+  const statBomba = $('#statBomba');
+  const statBombaBox = $('#statBombaBox');
+
+  let comprimento = +inputCO.value;
+  let intensidade = +inputInt.value;
+  const LIMIAR = 550; // nm
+
+  let photons = [];
+  let electrons = [];
+  let eletrosPorSegundo = 0;
+  let eletrosCount = 0;
+  let lastCountTime = performance.now();
+
+  function wavelengthToColor(nm) {
+    let r = 0, g = 0, b = 0;
+    if (nm >= 380 && nm < 440) { r = -(nm - 440) / (440 - 380); b = 1; }
+    else if (nm >= 440 && nm < 490) { g = (nm - 440) / (490 - 440); b = 1; }
+    else if (nm >= 490 && nm < 510) { g = 1; b = -(nm - 510) / (510 - 490); }
+    else if (nm >= 510 && nm < 580) { r = (nm - 510) / (580 - 510); g = 1; }
+    else if (nm >= 580 && nm < 645) { r = 1; g = -(nm - 645) / (645 - 580); }
+    else if (nm >= 645 && nm <= 780) { r = 1; }
+    else { r = 0.3; g = 0.3; b = 0.3; }
+    return `rgb(${Math.round(r*255)}, ${Math.round(g*255)}, ${Math.round(b*255)})`;
+  }
+
+  function wavelengthName(nm) {
+    if (nm < 380) return 'Ultravioleta';
+    if (nm < 450) return 'Violeta';
+    if (nm < 495) return 'Azul';
+    if (nm < 570) return 'Verde';
+    if (nm < 590) return 'Amarelo';
+    if (nm < 620) return 'Laranja';
+    if (nm < 750) return 'Vermelho';
+    return 'Infravermelho';
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  inputCO.addEventListener('input', e => {
+    comprimento = +e.target.value;
+    valCO.textContent = comprimento;
+    corOnda.textContent = wavelengthName(comprimento);
+    corOnda.style.color = wavelengthToColor(comprimento);
+  });
+  inputInt.addEventListener('input', e => {
+    intensidade = +e.target.value;
+    valInt.textContent = intensidade;
+  });
+
+  $('#btnResetSim2').addEventListener('click', () => {
+    photons = [];
+    electrons = [];
+    eletrosCount = 0;
+  });
+
+  // Inicializa cor
+  corOnda.textContent = wavelengthName(comprimento);
+  corOnda.style.color = wavelengthToColor(comprimento);
+
+  let lastFrame = performance.now();
+  function loop(now) {
+    const dt = (now - lastFrame) / 1000;
+    lastFrame = now;
+
+    const W = canvas.width, H = canvas.height;
+    const cor = wavelengthToColor(comprimento);
+    const acimaLimiar = comprimento < LIMIAR; // menor nm = maior frequência
+
+    // Gera fótons
+    const spawnRate = (intensidade / 100) * 30; // fótons por segundo
+    const spawnCount = spawnRate * dt;
+    for (let i = 0; i < spawnCount; i++) {
+      if (Math.random() < spawnCount - Math.floor(spawnCount) || i < Math.floor(spawnCount)) {
+        photons.push({
+          x: 20 + Math.random() * 40,
+          y: H * 0.3 + Math.random() * H * 0.4,
+          vx: 80 + Math.random() * 40,
+          size: 3 + Math.random() * 2,
+          color: cor
+        });
+      }
+    }
+
+    // Placa na posição central
+    const plateX = W * 0.55;
+    const plateY = H * 0.2;
+    const plateH = H * 0.6;
+    const plateW = 20;
+
+    // Atualiza fótons
+    photons.forEach(p => {
+      p.x += p.vx * dt;
+      // Colisão com placa
+      if (p.x >= plateX && !p.hit) {
+        p.hit = true;
+        if (acimaLimiar) {
+          // Ejeta elétron
+          electrons.push({
+            x: plateX + plateW + 5,
+            y: p.y,
+            vx: 60 + Math.random() * 40,
+            vy: (Math.random() - 0.5) * 30,
+            life: 1
+          });
+          eletrosCount++;
+        }
+      }
+    });
+    photons = photons.filter(p => p.x < W + 20 && !p.hit);
+
+    // Atualiza elétrons
+    electrons.forEach(e => {
+      e.x += e.vx * dt;
+      e.y += e.vy * dt;
+      e.life -= dt * 0.5;
+    });
+    electrons = electrons.filter(e => e.life > 0 && e.x < W + 20);
+
+    // Conta por segundo
+    if (now - lastCountTime > 1000) {
+      eletrosPorSegundo = acimaLimiar ? Math.round(eletrosCount * (1000 / (now - lastCountTime))) : 0;
+      eletrosCount = 0;
+      lastCountTime = now;
+    }
+
+    // DESENHO
+    // Fundo gradiente
+    const bg = ctx.createLinearGradient(0, 0, W, 0);
+    bg.addColorStop(0, '#1a1a2e');
+    bg.addColorStop(1, '#16213e');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Fonte de luz (esquerda)
+    ctx.fillStyle = cor;
+    ctx.beginPath();
+    ctx.arc(30, H * 0.5, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowColor = cor;
+    ctx.shadowBlur = 20;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FONTE', 30, H * 0.5 + 35);
+    ctx.fillText('DE LUZ', 30, H * 0.5 + 47);
+    ctx.textAlign = 'left';
+
+    // Placa fotovoltaica
+    const plateGrad = ctx.createLinearGradient(plateX, 0, plateX + plateW, 0);
+    plateGrad.addColorStop(0, '#4a4a6a');
+    plateGrad.addColorStop(0.5, '#2a2a4a');
+    plateGrad.addColorStop(1, '#1a1a2a');
+    ctx.fillStyle = plateGrad;
+    ctx.fillRect(plateX, plateY, plateW, plateH);
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(plateX, plateY, plateW, plateH);
+
+    // Grid da placa
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    for (let y = plateY; y < plateY + plateH; y += 15) {
+      ctx.beginPath();
+      ctx.moveTo(plateX, y);
+      ctx.lineTo(plateX + plateW, y);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PLACA', plateX + plateW / 2, plateY - 15);
+    ctx.fillText('FOTOVOLTAICA', plateX + plateW / 2, plateY - 3);
+    ctx.textAlign = 'left';
+
+    // Bomba de água (direita)
+    const pumpX = W - 80;
+    const pumpY = H * 0.35;
+    const pumpR = 25;
+    const bombaLigada = acimaLimiar && intensidade > 20;
+
+    ctx.save();
+    ctx.translate(pumpX, pumpY);
+    if (bombaLigada) ctx.rotate(now / 200);
+    ctx.fillStyle = bombaLigada ? '#2A9D8F' : '#555';
+    ctx.beginPath();
+    ctx.arc(0, 0, pumpR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Pás
+    for (let i = 0; i < 4; i++) {
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-2, -pumpR + 4, 4, pumpR - 8);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BOMBA', pumpX, pumpY + pumpR + 15);
+    ctx.fillText(bombaLigada ? '💧 LIGADA' : '⏸ DESLIGADA', pumpX, pumpY + pumpR + 28);
+    ctx.textAlign = 'left';
+
+    // Fótons
+    photons.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      // Rastro ondulante
+      ctx.strokeStyle = p.color;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 0; i < 15; i++) {
+        const tx = p.x - i * 2;
+        const ty = p.y + Math.sin(i * 0.8 + now / 100) * 2;
+        if (i === 0) ctx.moveTo(tx, ty);
+        else ctx.lineTo(tx, ty);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    });
+
+    // Elétrons
+    electrons.forEach(e => {
+      ctx.fillStyle = `rgba(0, 255, 200, ${e.life})`;
+      ctx.shadowColor = '#00ffc8';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText('e⁻', e.x - 4, e.y - 5);
+    });
+
+    // Atualiza stats
+    if (comprimento < 380) {
+      statFreq.textContent = 'Muito Alta (UV)';
+      statFreqBox.className = 'stat-box warn';
+    } else if (comprimento < 500) {
+      statFreq.textContent = 'Alta';
+      statFreqBox.className = 'stat-box ok';
+    } else if (comprimento < 620) {
+      statFreq.textContent = 'Média';
+      statFreqBox.className = 'stat-box';
+    } else {
+      statFreq.textContent = 'Baixa';
+      statFreqBox.className = 'stat-box warn';
+    }
+
+    statElet.textContent = eletrosPorSegundo + ' / s';
+    if (bombaLigada) {
+      statBomba.textContent = '💧 Ligada';
+      statBombaBox.className = 'stat-box ok';
+    } else {
+      statBomba.textContent = '⏸ Desligada';
+      statBombaBox.className = 'stat-box warn';
+    }
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ============================================================
+   SCROLL SUAVE COM OFFSET PARA HEADERS FIXOS
+   ============================================================ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (href.length < 2) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const offset = 130; // altura combinada das barras fixas
+    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+    // Foca no alvo para leitores de tela
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  });
+});
+
+/* ============================================================
+   ATALHOS DE TECLADO GLOBAIS
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  // Alt+1 já é tratado pelo accesskey nativo
+  // Alt+C = contraste
+  if (e.altKey && e.key.toLowerCase() === 'c') {
+    e.preventDefault();
+    btnContrast?.click();
+  }
+  // Alt+D = dislexia
+  if (e.altKey && e.key.toLowerCase() === 'd') {
+    e.preventDefault();
+    btnDyslexic?.click();
+  }
+  // Alt+V = voz
+  if (e.altKey && e.key.toLowerCase() === 'v') {
+    e.preventDefault();
+    btnVoice?.click();
+  }
+  // Alt+Seta para cima = aumentar fonte
+  if (e.altKey && e.key === 'ArrowUp') {
+    e.preventDefault();
+    $('#btnFontUp')?.click();
+  }
+  // Alt+Seta para baixo = diminuir fonte
+  if (e.altKey && e.key === 'ArrowDown') {
+    e.preventDefault();
+    $('#btnFontDown')?.click();
+  }
+});
+
+/* ============================================================
+   ANIMAÇÃO DE ENTRADA (Intersection Observer)
+   ============================================================ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.card, .physics-topic, .component, .impact-card, .simulator-container').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  io.observe(el);
+});
+
+/* ============================================================
+   LOG INICIAL
+   ============================================================ */
+console.log('%c🏊 Piscina Térmica & Tecnociência — CEP', 'color:#005C53; font-size:18px; font-weight:bold');
+console.log('%cAcessibilidade: Alt+C (contraste) · Alt+D (dislexia) · Alt+V (voz) · Alt+1 (pular)', 'color:#F4A261');
+</script>
+
+</body>
+</html>
