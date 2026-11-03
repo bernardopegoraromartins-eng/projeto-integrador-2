@@ -1,0 +1,858 @@
+/* ============================================================
+   PISCINA TÉRMICA & TECNOCIÊNCIA — CEP
+   Script principal
+   ============================================================ */
+
+/* ---------- UTILITÁRIOS ---------- */
+const $ = (sel, ctx = document) => ctx.querySelector(sel);
+const $$ = (sel, ctx = document) => ctx.querySelectorAll(sel);
+
+function showToast(msg, duration = 2800) {
+  const toast = $('#toast');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+function safeStorage(action, key, value) {
+  try {
+    if (action === 'get') return localStorage.getItem(key);
+    if (action === 'set') localStorage.setItem(key, value);
+    if (action === 'remove') localStorage.removeItem(key);
+  } catch (e) {
+    console.warn('localStorage indisponível:', e);
+  }
+}
+
+/* ---------- MENU MOBILE ---------- */
+const menuToggle = $('#menuToggle');
+const mainNav = $('#mainNav');
+
+menuToggle?.addEventListener('click', () => {
+  const isOpen = mainNav.classList.toggle('open');
+  menuToggle.setAttribute('aria-expanded', isOpen);
+  menuToggle.textContent = isOpen ? '✕ Fechar' : '☰ Menu';
+});
+
+$$('#mainNav a').forEach(a => {
+  a.addEventListener('click', () => {
+    mainNav.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+    if (menuToggle) menuToggle.textContent = '☰ Menu';
+  });
+});
+
+/* ---------- ACESSIBILIDADE: CONTRASTE ---------- */
+const btnContrast = $('#btnContrast');
+
+function toggleContrast(force) {
+  const shouldEnable = force !== undefined ? force : !document.body.classList.contains('high-contrast');
+  document.body.classList.toggle('high-contrast', shouldEnable);
+  btnContrast?.setAttribute('aria-pressed', shouldEnable);
+  safeStorage('set', 'highContrast', shouldEnable ? '1' : '0');
+  showToast(shouldEnable ? '♿ Alto contraste ativado' : '♿ Alto contraste desativado');
+}
+
+btnContrast?.addEventListener('click', () => toggleContrast());
+
+/* ---------- ACESSIBILIDADE: TAMANHO DA FONTE ---------- */
+let fontScale = parseFloat(safeStorage('get', 'fontScale')) || 1;
+const FONT_STEP = 0.1;
+const FONT_MIN = 0.8;
+const FONT_MAX = 1.8;
+
+function applyFontScale() {
+  document.documentElement.style.setProperty('--font-scale', fontScale);
+  safeStorage('set', 'fontScale', fontScale.toString());
+}
+applyFontScale();
+
+$('#btnFontUp')?.addEventListener('click', () => {
+  if (fontScale < FONT_MAX) {
+    fontScale = Math.min(FONT_MAX, +(fontScale + FONT_STEP).toFixed(2));
+    applyFontScale();
+    showToast(`🅰️ Fonte: ${Math.round(fontScale * 100)}%`);
+  } else {
+    showToast('⚠️ Tamanho máximo atingido');
+  }
+});
+
+$('#btnFontDown')?.addEventListener('click', () => {
+  if (fontScale > FONT_MIN) {
+    fontScale = Math.max(FONT_MIN, +(fontScale - FONT_STEP).toFixed(2));
+    applyFontScale();
+    showToast(`🅰️ Fonte: ${Math.round(fontScale * 100)}%`);
+  } else {
+    showToast('⚠️ Tamanho mínimo atingido');
+  }
+});
+
+/* ---------- ACESSIBILIDADE: FONTE DISLEXIA ---------- */
+const btnDyslexic = $('#btnDyslexic');
+
+function toggleDyslexic(force) {
+  const shouldEnable = force !== undefined ? force : !document.body.classList.contains('dyslexic-font');
+  document.body.classList.toggle('dyslexic-font', shouldEnable);
+  btnDyslexic?.setAttribute('aria-pressed', shouldEnable);
+  safeStorage('set', 'dyslexicFont', shouldEnable ? '1' : '0');
+  showToast(shouldEnable ? '📖 Fonte para dislexia ativada' : '📖 Fonte padrão restaurada');
+}
+
+btnDyslexic?.addEventListener('click', () => toggleDyslexic());
+
+/* ---------- ACESSIBILIDADE: LEITOR DE VOZ ---------- */
+const btnVoice = $('#btnVoice');
+let voiceEnabled = false;
+
+btnVoice?.addEventListener('click', () => {
+  if (!('speechSynthesis' in window)) {
+    showToast('❌ Seu navegador não suporta leitura de voz');
+    return;
+  }
+  voiceEnabled = !voiceEnabled;
+  btnVoice.setAttribute('aria-pressed', voiceEnabled);
+  safeStorage('set', 'voiceEnabled', voiceEnabled ? '1' : '0');
+
+  if (voiceEnabled) {
+    showToast('🔊 Leitor ativado — clique em um texto para ouvir');
+    document.addEventListener('click', speakOnClick);
+  } else {
+    showToast('🔇 Leitor desativado');
+    document.removeEventListener('click', speakOnClick);
+    window.speechSynthesis.cancel();
+  }
+});
+
+function speakOnClick(e) {
+  const target = e.target;
+  const textEls = ['P', 'H1', 'H2', 'H3', 'H4', 'LI', 'SPAN', 'A', 'STRONG', 'EM'];
+  if (!textEls.includes(target.tagName)) return;
+  const text = target.innerText.trim();
+  if (!text || text.length < 3) return;
+
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'pt-BR';
+  utter.rate = 0.95;
+  utter.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const ptVoice = voices.find(v => v.lang.startsWith('pt'));
+  if (ptVoice) utter.voice = ptVoice;
+  window.speechSynthesis.speak(utter);
+}
+
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+/* ---------- RESTAURAR PREFERÊNCIAS ---------- */
+(function restorePreferences() {
+  if (safeStorage('get', 'highContrast') === '1') {
+    document.body.classList.add('high-contrast');
+    btnContrast?.setAttribute('aria-pressed', 'true');
+  }
+  if (safeStorage('get', 'dyslexicFont') === '1') {
+    document.body.classList.add('dyslexic-font');
+    btnDyslexic?.setAttribute('aria-pressed', 'true');
+  }
+  if (safeStorage('get', 'voiceEnabled') === '1' && 'speechSynthesis' in window) {
+    voiceEnabled = true;
+    btnVoice?.setAttribute('aria-pressed', 'true');
+    document.addEventListener('click', speakOnClick);
+  }
+})();
+
+/* ---------- HERO: BOLHAS E TEMPERATURA ---------- */
+const bubblesContainer = $('#bubblesContainer');
+
+function createBubble() {
+  if (!bubblesContainer) return;
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.style.left = Math.random() * 100 + '%';
+  b.style.animationDuration = (3 + Math.random() * 4) + 's';
+  const size = (4 + Math.random() * 8) + 'px';
+  b.style.width = size;
+  b.style.height = size;
+  bubblesContainer.appendChild(b);
+  setTimeout(() => b.remove(), 7000);
+}
+setInterval(createBubble, 600);
+
+const heroTemp = $('#heroTemp');
+let heroT = 28.5;
+setInterval(() => {
+  if (!heroTemp) return;
+  heroT += (Math.random() - 0.5) * 0.3;
+  heroT = Math.max(26, Math.min(30, heroT));
+  heroTemp.textContent = heroT.toFixed(1) + '°C';
+}, 1500);
+
+/* ============================================================
+   SIMULADOR 1 — PERDA TÉRMICA E CAPA PROTETORA
+   ============================================================ */
+(function simulatorTermico() {
+  const canvas = $('#canvasSim1');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const inputTempAmb = $('#tempAmbiente');
+  const inputTempAgua = $('#tempAgua');
+  const valTempAmb = $('#tempAmbienteVal');
+  const valTempAgua = $('#tempAguaVal');
+  const statTempAgua = $('#statTempAgua');
+  const statPerda = $('#statPerda');
+  const statPerdaBox = $('#statPerdaBox');
+  const statEconomia = $('#statEconomia');
+
+  let tempAmb = +inputTempAmb.value;
+  let tempAgua = +inputTempAgua.value;
+  let tempInicial = tempAgua;
+  let comCapa = true;
+
+  const chartCanvas = $('#chartSim1');
+  const chartCtx = chartCanvas.getContext('2d');
+  let history = [];
+  const MAX_HISTORY = 120;
+  let irParticles = [];
+  let startTime = performance.now();
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    const rect2 = chartCanvas.getBoundingClientRect();
+    chartCanvas.width = rect2.width * devicePixelRatio;
+    chartCanvas.height = 180 * devicePixelRatio;
+    chartCtx.scale(devicePixelRatio, devicePixelRatio);
+    chartCanvas.style.width = rect2.width + 'px';
+    chartCanvas.style.height = '180px';
+  }
+  resizeCanvas();
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+  });
+
+  inputTempAmb.addEventListener('input', e => {
+    tempAmb = +e.target.value;
+    valTempAmb.textContent = tempAmb;
+  });
+  inputTempAgua.addEventListener('input', e => {
+    tempAgua = +e.target.value;
+    tempInicial = tempAgua;
+    valTempAgua.textContent = tempAgua.toFixed(1);
+    history = [];
+    startTime = performance.now();
+  });
+
+  $$('.toggle-btn[data-capa]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      $$('.toggle-btn[data-capa]').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-checked', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-checked', 'true');
+      comCapa = btn.dataset.capa === 'com';
+    });
+  });
+
+  $('#btnResetSim1')?.addEventListener('click', () => {
+    tempAgua = +inputTempAgua.value;
+    tempInicial = tempAgua;
+    history = [];
+    irParticles = [];
+    startTime = performance.now();
+    showToast('🔄 Simulação reiniciada');
+  });
+
+  let lastSim = performance.now();
+  function simStep(now) {
+    const dt = (now - lastSim) / 1000;
+    lastSim = now;
+
+    const diff = tempAgua - tempAmb;
+    const k = comCapa ? 0.005 : 0.025;
+    if (diff > 0) {
+      tempAgua -= k * diff * dt * 10;
+      if (tempAgua < tempAmb) tempAgua = tempAmb;
+    }
+
+    if (history.length === 0 || now - history[history.length - 1].t > 500) {
+      history.push({ t: now, temp: tempAgua });
+      if (history.length > MAX_HISTORY) history.shift();
+    }
+
+    const W = canvas.width / devicePixelRatio;
+    const H = canvas.height / devicePixelRatio;
+
+    if (!comCapa && diff > 0.5 && Math.random() < 0.4) {
+      irParticles.push({
+        x: W * (0.2 + Math.random() * 0.6),
+        y: H * 0.5,
+        vy: -0.8 - Math.random() * 1.2,
+        life: 1,
+        size: 2 + Math.random() * 3
+      });
+    }
+    irParticles.forEach(p => {
+      p.y += p.vy;
+      p.life -= 0.012;
+    });
+    irParticles = irParticles.filter(p => p.life > 0 && p.y > 0);
+
+    draw(W, H, now);
+    updateStats();
+    drawChart();
+    requestAnimationFrame(simStep);
+  }
+
+  function draw(W, H, now) {
+    ctx.clearRect(0, 0, W, H);
+
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+    const skyTemp = Math.max(0, Math.min(1, (tempAmb - 5) / 30));
+    skyGrad.addColorStop(0, `hsl(${200 - skyTemp * 20}, ${60 + skyTemp * 20}%, ${70 - skyTemp * 20}%)`);
+    skyGrad.addColorStop(1, `hsl(${200 - skyTemp * 20}, ${50 + skyTemp * 20}%, ${50 - skyTemp * 10}%)`);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, W, H * 0.5);
+
+    const waterGrad = ctx.createLinearGradient(0, H * 0.5, 0, H);
+    const waterHue = 170 + (tempAgua - 20) * 1.5;
+    waterGrad.addColorStop(0, `hsl(${waterHue}, 60%, 40%)`);
+    waterGrad.addColorStop(1, `hsl(${waterHue}, 70%, 25%)`);
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(0, H * 0.5, W, H * 0.5);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = 2;
+    const t = now / 500;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 10) {
+        const y = H * 0.5 + Math.sin(x / 30 + t + i) * 3 + i * 8;
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    if (comCapa) {
+      ctx.fillStyle = 'rgba(40, 40, 60, 0.85)';
+      ctx.fillRect(0, H * 0.48, W, 12);
+      ctx.fillStyle = 'rgba(244, 162, 97, 0.6)';
+      ctx.fillRect(0, H * 0.48, W, 3);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('🛡️ CAPA TÉRMICA', 10, H * 0.48 - 4);
+    }
+
+    irParticles.forEach(p => {
+      ctx.fillStyle = `rgba(255, 80, 80, ${p.life})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = `rgba(255, 80, 80, ${p.life * 0.5})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x, p.y + 10);
+      ctx.stroke();
+    });
+
+    const termX = W - 40;
+    const termH = H * 0.4;
+    const termY = H * 0.55;
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillRect(termX - 8, termY, 16, termH);
+    ctx.strokeStyle = '#222';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(termX - 8, termY, 16, termH);
+    const fillH = ((tempAgua - 5) / 35) * termH;
+    const termGrad = ctx.createLinearGradient(0, termY + termH - fillH, 0, termY + termH);
+    termGrad.addColorStop(0, '#F4A261');
+    termGrad.addColorStop(1, '#D62828');
+    ctx.fillStyle = termGrad;
+    ctx.fillRect(termX - 6, termY + termH - fillH, 12, fillH);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(tempAgua.toFixed(1) + '°C', termX, termY - 6);
+    ctx.textAlign = 'left';
+  }
+
+  function updateStats() {
+    statTempAgua.textContent = tempAgua.toFixed(1) + '°C';
+    const diff = tempInicial - tempAgua;
+    let perda = 'Baixa';
+    let classe = 'ok';
+    if (diff > 3) { perda = 'Alta'; classe = 'warn'; }
+    else if (diff > 1) { perda = 'Média'; classe = ''; }
+    statPerda.textContent = perda;
+    statPerdaBox.className = 'stat-box ' + classe;
+
+    const perdaSemCapa = 0.025 * Math.max(0, tempInicial - tempAmb);
+    const perdaComCapa = 0.005 * Math.max(0, tempInicial - tempAmb);
+    const economiaKwh = Math.max(0, (perdaSemCapa - perdaComCapa)) * 10;
+    const custoKwh = 0.85;
+    const economiaR$ = (economiaKwh * custoKwh * (history.length / 60)).toFixed(2);
+    statEconomia.textContent = 'R$ ' + economiaR$;
+  }
+
+  function drawChart() {
+    const W = chartCanvas.width / devicePixelRatio;
+    const H = chartCanvas.height / devicePixelRatio;
+    chartCtx.clearRect(0, 0, W, H);
+
+    chartCtx.strokeStyle = 'rgba(0,0,0,0.08)';
+    chartCtx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (H / 4) * i;
+      chartCtx.beginPath();
+      chartCtx.moveTo(0, y);
+      chartCtx.lineTo(W, y);
+      chartCtx.stroke();
+    }
+
+    if (history.length < 2) return;
+
+    const minT = Math.min(...history.map(h => h.temp), tempAmb);
+    const maxT = Math.max(...history.map(h => h.temp), 35);
+    const range = maxT - minT || 1;
+
+    const idealY = H - ((28 - minT) / range) * H;
+    chartCtx.strokeStyle = 'rgba(42, 157, 143, 0.5)';
+    chartCtx.setLineDash([4, 4]);
+    chartCtx.beginPath();
+    chartCtx.moveTo(0, idealY);
+    chartCtx.lineTo(W, idealY);
+    chartCtx.stroke();
+    chartCtx.setLineDash([]);
+    chartCtx.fillStyle = '#2A9D8F';
+    chartCtx.font = 'bold 10px sans-serif';
+    chartCtx.fillText('Ideal: 28°C', 5, idealY - 3);
+
+    chartCtx.strokeStyle = '#005C53';
+    chartCtx.lineWidth = 2.5;
+    chartCtx.beginPath();
+    history.forEach((h, i) => {
+      const x = (i / (MAX_HISTORY - 1)) * W;
+      const y = H - ((h.temp - minT) / range) * H;
+      if (i === 0) chartCtx.moveTo(x, y);
+      else chartCtx.lineTo(x, y);
+    });
+    chartCtx.stroke();
+
+    chartCtx.lineTo(W, H);
+    chartCtx.lineTo(0, H);
+    chartCtx.closePath();
+    chartCtx.fillStyle = 'rgba(0, 92, 83, 0.15)';
+    chartCtx.fill();
+  }
+
+  requestAnimationFrame(simStep);
+})();
+
+/* ============================================================
+   SIMULADOR 2 — EFEITO FOTOELÉTRICO
+   ============================================================ */
+(function simuladorFotoeletrico() {
+  const canvas = $('#canvasSim2');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const inputCO = $('#comprimentoOnda');
+  const inputInt = $('#intensidadeSolar');
+  const valCO = $('#comprimentoOndaVal');
+  const valInt = $('#intensidadeVal');
+  const corOnda = $('#corOnda');
+  const statFreq = $('#statFreq');
+  const statFreqBox = $('#statFreqBox');
+  const statElet = $('#statEletrons');
+  const statBomba = $('#statBomba');
+  const statBombaBox = $('#statBombaBox');
+
+  let comprimento = +inputCO.value;
+  let intensidade = +inputInt.value;
+  const LIMIAR = 550;
+
+  let photons = [];
+  let electrons = [];
+  let eletrosPorSegundo = 0;
+  let eletrosCount = 0;
+  let lastCountTime = performance.now();
+
+  function wavelengthToColor(nm) {
+    let r = 0, g = 0, b = 0;
+    if (nm >= 380 && nm < 440) { r = -(nm - 440) / (440 - 380); b = 1; }
+    else if (nm >= 440 && nm < 490) { g = (nm - 440) / (490 - 440); b = 1; }
+    else if (nm >= 490 && nm < 510) { g = 1; b = -(nm - 510) / (510 - 490); }
+    else if (nm >= 510 && nm < 580) { r = (nm - 510) / (580 - 510); g = 1; }
+    else if (nm >= 580 && nm < 645) { r = 1; g = -(nm - 645) / (645 - 580); }
+    else if (nm >= 645 && nm <= 780) { r = 1; }
+    else { r = 0.4; g = 0.2; b = 0.5; }
+    return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
+  }
+
+  function wavelengthName(nm) {
+    if (nm < 380) return 'Ultravioleta';
+    if (nm < 450) return 'Violeta';
+    if (nm < 495) return 'Azul';
+    if (nm < 570) return 'Verde';
+    if (nm < 590) return 'Amarelo';
+    if (nm < 620) return 'Laranja';
+    if (nm < 750) return 'Vermelho';
+    return 'Infravermelho';
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  inputCO.addEventListener('input', e => {
+    comprimento = +e.target.value;
+    valCO.textContent = comprimento;
+    corOnda.textContent = wavelengthName(comprimento);
+    corOnda.style.color = wavelengthToColor(comprimento);
+  });
+  inputInt.addEventListener('input', e => {
+    intensidade = +e.target.value;
+    valInt.textContent = intensidade;
+  });
+
+  $('#btnResetSim2')?.addEventListener('click', () => {
+    photons = [];
+    electrons = [];
+    eletrosCount = 0;
+    showToast('🔄 Simulação reiniciada');
+  });
+
+  corOnda.textContent = wavelengthName(comprimento);
+  corOnda.style.color = wavelengthToColor(comprimento);
+
+  let lastFrame = performance.now();
+  function loop(now) {
+    const dt = (now - lastFrame) / 1000;
+    lastFrame = now;
+
+    const W = canvas.width / devicePixelRatio;
+    const H = canvas.height / devicePixelRatio;
+    const cor = wavelengthToColor(comprimento);
+    const acimaLimiar = comprimento < LIMIAR;
+
+    const spawnRate = (intensidade / 100) * 30;
+    const spawnCount = spawnRate * dt;
+    for (let i = 0; i < spawnCount; i++) {
+      if (Math.random() < 0.8) {
+        photons.push({
+          x: 20 + Math.random() * 40,
+          y: H * 0.3 + Math.random() * H * 0.4,
+          vx: 80 + Math.random() * 40,
+          size: 3 + Math.random() * 2,
+          color: cor
+        });
+      }
+    }
+
+    const plateX = W * 0.55;
+    const plateY = H * 0.2;
+    const plateH = H * 0.6;
+    const plateW = 20;
+
+    photons.forEach(p => {
+      p.x += p.vx * dt;
+      if (p.x >= plateX && !p.hit) {
+        p.hit = true;
+        if (acimaLimiar) {
+          electrons.push({
+            x: plateX + plateW + 5,
+            y: p.y,
+            vx: 60 + Math.random() * 40,
+            vy: (Math.random() - 0.5) * 30,
+            life: 1
+          });
+          eletrosCount++;
+        }
+      }
+    });
+    photons = photons.filter(p => p.x < W + 20 && !p.hit);
+
+    electrons.forEach(e => {
+      e.x += e.vx * dt;
+      e.y += e.vy * dt;
+      e.life -= dt * 0.5;
+    });
+    electrons = electrons.filter(e => e.life > 0 && e.x < W + 20);
+
+    if (now - lastCountTime > 1000) {
+      eletrosPorSegundo = acimaLimiar ? Math.round(eletrosCount * (1000 / (now - lastCountTime))) : 0;
+      eletrosCount = 0;
+      lastCountTime = now;
+    }
+
+    ctx.clearRect(0, 0, W, H);
+
+    const bg = ctx.createLinearGradient(0, 0, W, 0);
+    bg.addColorStop(0, '#1a1a2e');
+    bg.addColorStop(1, '#16213e');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = cor;
+    ctx.shadowColor = cor;
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(30, H * 0.5, 20, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('FONTE', 30, H * 0.5 + 35);
+    ctx.fillText('DE LUZ', 30, H * 0.5 + 47);
+    ctx.textAlign = 'left';
+
+    const plateGrad = ctx.createLinearGradient(plateX, 0, plateX + plateW, 0);
+    plateGrad.addColorStop(0, '#4a4a6a');
+    plateGrad.addColorStop(0.5, '#2a2a4a');
+    plateGrad.addColorStop(1, '#1a1a2a');
+    ctx.fillStyle = plateGrad;
+    ctx.fillRect(plateX, plateY, plateW, plateH);
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(plateX, plateY, plateW, plateH);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    for (let y = plateY; y < plateY + plateH; y += 15) {
+      ctx.beginPath();
+      ctx.moveTo(plateX, y);
+      ctx.lineTo(plateX + plateW, y);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('PLACA', plateX + plateW / 2, plateY - 15);
+    ctx.fillText('FOTOVOLTAICA', plateX + plateW / 2, plateY - 3);
+    ctx.textAlign = 'left';
+
+    const pumpX = W - 80;
+    const pumpY = H * 0.35;
+    const pumpR = 25;
+    const bombaLigada = acimaLimiar && intensidade > 20;
+
+    ctx.save();
+    ctx.translate(pumpX, pumpY);
+    if (bombaLigada) ctx.rotate(now / 200);
+    ctx.fillStyle = bombaLigada ? '#2A9D8F' : '#555';
+    ctx.beginPath();
+    ctx.arc(0, 0, pumpR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    for (let i = 0; i < 4; i++) {
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-2, -pumpR + 4, 4, pumpR - 8);
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('BOMBA', pumpX, pumpY + pumpR + 15);
+    ctx.fillText(bombaLigada ? '💧 LIGADA' : '⏸ DESLIGADA', pumpX, pumpY + pumpR + 28);
+    ctx.textAlign = 'left';
+
+    photons.forEach(p => {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = p.color;
+      ctx.globalAlpha = 0.4;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let i = 0; i < 15; i++) {
+        const tx = p.x - i * 2;
+        const ty = p.y + Math.sin(i * 0.8 + now / 100) * 2;
+        if (i === 0) ctx.moveTo(tx, ty);
+        else ctx.lineTo(tx, ty);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+    });
+
+    electrons.forEach(e => {
+      ctx.fillStyle = `rgba(0, 255, 200, ${e.life})`;
+      ctx.shadowColor = '#00ffc8';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.fillText('e⁻', e.x - 4, e.y - 5);
+    });
+
+    if (comprimento < 380) {
+      statFreq.textContent = 'Muito Alta (UV)';
+      statFreqBox.className = 'stat-box warn';
+    } else if (comprimento < 500) {
+      statFreq.textContent = 'Alta';
+      statFreqBox.className = 'stat-box ok';
+    } else if (comprimento < 620) {
+      statFreq.textContent = 'Média';
+      statFreqBox.className = 'stat-box';
+    } else {
+      statFreq.textContent = 'Baixa';
+      statFreqBox.className = 'stat-box warn';
+    }
+
+    statElet.textContent = eletrosPorSegundo + ' / s';
+    if (bombaLigada) {
+      statBomba.textContent = '💧 Ligada';
+      statBombaBox.className = 'stat-box ok';
+    } else {
+      statBomba.textContent = '⏸ Desligada';
+      statBombaBox.className = 'stat-box warn';
+    }
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ============================================================
+   SCROLL SUAVE COM OFFSET
+   ============================================================ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (href.length < 2) return;
+    const target = document.querySelector(href);
+    if (!target) return;
+    e.preventDefault();
+    const offset = 140;
+    const top = target.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  });
+});
+
+/* ============================================================
+   BOTÃO VOLTAR AO TOPO
+   ============================================================ */
+const backToTop = $('#backToTop');
+window.addEventListener('scroll', () => {
+  if (!backToTop) return;
+  if (window.scrollY > 500) backToTop.classList.add('visible');
+  else backToTop.classList.remove('visible');
+}, { passive: true });
+
+backToTop?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* ============================================================
+   BARRA DE PROGRESSO DE LEITURA
+   ============================================================ */
+const readingProgress = $('#readingProgress');
+window.addEventListener('scroll', () => {
+  if (!readingProgress) return;
+  const scrolled = window.scrollY;
+  const height = document.documentElement.scrollHeight - window.innerHeight;
+  const percent = (scrolled / height) * 100;
+  readingProgress.style.width = percent + '%';
+}, { passive: true });
+
+/* ============================================================
+   ATALHOS DE TECLADO GLOBAIS
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  const alt = e.altKey;
+  if (!alt) return;
+  const key = e.key.toLowerCase();
+
+  if (key === 'c') { e.preventDefault(); toggleContrast(); }
+  else if (key === 'd') { e.preventDefault(); toggleDyslexic(); }
+  else if (key === 'v') { e.preventDefault(); btnVoice?.click(); }
+  else if (key === 'arrowup') { e.preventDefault(); $('#btnFontUp')?.click(); }
+  else if (key === 'arrowdown') { e.preventDefault(); $('#btnFontDown')?.click(); }
+  else if (key === 'home') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  else if (key === 'end') {
+    e.preventDefault();
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+  }
+});
+
+/* ============================================================
+   ANIMAÇÃO DE ENTRADA (Intersection Observer)
+   ============================================================ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.card, .physics-topic, .component, .impact-card, .simulator-container, .highlight-block').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  io.observe(el);
+});
+
+/* ============================================================
+   DESTACAR ITEM ATIVO NO MENU DURANTE SCROLL
+   ============================================================ */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.main-nav a');
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(link => {
+        link.style.background = link.getAttribute('href') === '#' + id
+          ? 'var(--amarelo-solar)'
+          : '';
+        link.style.color = link.getAttribute('href') === '#' + id
+          ? 'var(--cinza-escuro)'
+          : '';
+      });
+    }
+  });
+}, { threshold: 0.3, rootMargin: '-150px 0px -50% 0px' });
+
+sections.forEach(s => sectionObserver.observe(s));
+
+/* ============================================================
+   LOG INICIAL
+   ============================================================ */
+console.log('%c🏊 Piscina Térmica & Tecnociência — CEP', 'color:#005C53; font-size:18px; font-weight:bold');
+console.log('%cAtalhos: Alt+C (contraste) · Alt+D (dislexia) · Alt+V (voz) · Alt+↑/↓ (fonte) · Alt+Home/End (início/fim)', 'color:#F4A261');
